@@ -12,7 +12,6 @@ import {ifDefined} from 'lit/directives/if-defined';
 import {ActionElement, BeginPressConfig, EndPressConfig} from '../../action_element/action-element';
 import {ariaProperty} from '../../decorators/aria-property';
 import {MdRipple} from '../../ripple/ripple';
-import {RippleHandlers} from '../../ripple/ripple-handlers';
 
 /** @soyCompatible */
 export class IconButtonToggle extends ActionElement {
@@ -37,21 +36,14 @@ export class IconButtonToggle extends ActionElement {
 
   @property({type: Boolean, reflect: true}) isOn = false;
 
-  @queryAsync('md-ripple') ripple!: Promise<MdRipple|null>;
-
-  @state() protected shouldRenderRipple = false;
-
-  protected rippleHandlers: RippleHandlers = new RippleHandlers(() => {
-    this.shouldRenderRipple = true;
-    return this.ripple;
-  });
+  @query('md-ripple') ripple!: MdRipple;
 
   override beginPress({positionEvent}: BeginPressConfig) {
-    this.rippleHandlers.startPress(positionEvent ?? undefined);
+    this.ripple.beginPress(positionEvent);
   }
 
   override endPress({cancelled}: EndPressConfig) {
-    this.rippleHandlers.endPress();
+    this.ripple.endPress();
     if (cancelled) {
       return;
     }
@@ -68,23 +60,21 @@ export class IconButtonToggle extends ActionElement {
   }
 
   override focus() {
-    this.rippleHandlers.startFocus();
+    this.ripple.beginFocus();
     this.mdcRoot.focus();
   }
 
   override blur() {
-    this.rippleHandlers.endFocus();
+    this.ripple.endFocus();
     this.mdcRoot.blur();
   }
 
   /** @soyTemplate */
-  protected renderRipple(): TemplateResult|string {
-    return this.shouldRenderRipple ? html`
-            <md-ripple
+  protected renderRipple(): TemplateResult {
+    return html`<md-ripple
                 .disabled="${this.disabled}"
                 unbounded>
-            </md-ripple>` :
-                                     '';
+            </md-ripple>`;
   }
 
   /** @soyTemplate */
@@ -139,22 +129,19 @@ export class IconButtonToggle extends ActionElement {
   }
 
   protected handlePointerEnter(e: PointerEvent) {
-    // TODO(b/149026822): Remove check, implement in ripple
-    if (e.pointerType !== 'touch') {
-      this.rippleHandlers.startHover();
-    }
+    this.ripple.beginHover(e);
   }
 
   override handlePointerLeave(e: PointerEvent) {
     super.handlePointerLeave(e);
-    this.rippleHandlers.endHover();
+    this.ripple.endHover();
   }
 
   protected handleFocus() {
-    this.rippleHandlers.startFocus();
+    this.ripple.beginFocus();
   }
 
   protected handleBlur() {
-    this.rippleHandlers.endFocus();
+    this.ripple.endFocus();
   }
 }
