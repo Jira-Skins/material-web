@@ -5,19 +5,18 @@
  */
 
 import '../../tab_indicator/tab-indicator';
-import '@material/mwc-ripple/mwc-ripple';
 import '../../../focus/focus-ring';
 import '../../../icon/icon';
 
 import {addHasRemoveClass, BaseElement} from '@material/mwc-base/base-element';
 import {observer} from '@material/mwc-base/observer';
-import {Ripple} from '@material/mwc-ripple/mwc-ripple';
-import {RippleHandlers} from '@material/mwc-ripple/ripple-handlers';
 import {html, TemplateResult} from 'lit';
 import {eventOptions, property, query, queryAsync, state} from 'lit/decorators.js';
 import {ClassInfo, classMap} from 'lit/directives/class-map.js';
 
 import {pointerPress, shouldShowStrongFocus} from '../../../focus/strong-focus';
+import {MdRipple} from '../../../ripple/ripple';
+import {RippleHandlers} from '../../../ripple/ripple-handlers';
 import {MdTabIndicator} from '../../tab_indicator/tab-indicator';
 
 import {MDCTabAdapter} from './adapter';
@@ -85,11 +84,9 @@ export class Tab extends BaseElement {
 
   @state() protected shouldRenderRipple = false;
 
-  @state() protected useStateLayerCustomProperties = false;
+  @queryAsync('md-ripple') ripple!: Promise<MdRipple|null>;
 
-  @queryAsync('mwc-ripple') ripple!: Promise<Ripple|null>;
-
-  protected rippleElement: Ripple|null = null;
+  protected rippleElement: MdRipple|null = null;
 
   override connectedCallback() {
     this.dir = document.dir;
@@ -166,11 +163,7 @@ export class Tab extends BaseElement {
   // TODO(dfreedm): Make this use selected as a param after Polymer/internal#739
   /** @soyCompatible */
   protected renderRipple() {
-    return this.shouldRenderRipple ?
-        html`<mwc-ripple primary
-        .internalUseStateLayerCustomProperties="${
-            this.useStateLayerCustomProperties}"></mwc-ripple>` :
-        '';
+    return this.shouldRenderRipple ? html`<md-ripple primary></md-ripple>` : '';
   }
 
   /** @soyTemplate */
@@ -319,9 +312,5 @@ export class Tab extends BaseElement {
   protected handleRippleBlur() {
     this.rippleHandlers.endFocus();
     this.showFocusRing = false;
-  }
-
-  get isRippleActive() {
-    return this.rippleElement?.isActive || false;
   }
 }
